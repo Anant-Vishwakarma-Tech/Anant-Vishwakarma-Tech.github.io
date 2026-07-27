@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anant — Engineering &amp; CAD Portfolio</title>
+<meta name="description" content="Mechanical design, CAD, and applied-AI project portfolio.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root {
+  --void:        #0b0e14;
+  --panel:       #121721;
+  --panel-2:     #171d29;
+  --line:        #232b3a;
+  --cyan:        #4fd8e0;
+  --cyan-dim:    #2c6b70;
+  --amber:       #e8a33d;
+  --text:        #e7ecef;
+  --text-dim:    #8b96a3;
+  --text-faint:  #4d5866;
+  --danger:      #d96a5f;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body:    "Inter", sans-serif;
+  --font-mono:    "IBM Plex Mono", monospace;
+
+  --radius: 3px;
+  --ease: cubic-bezier(.22,.9,.32,1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+a { color: inherit; }
+
+::selection { background: var(--cyan); color: var(--void); }
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   AMBIENT BLUEPRINT BACKGROUND
+   ============================================================ */
+#bp-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.35;
+  transform: translate3d(0,0,0);
+  transition: transform 0.2s ease-out;
+}
+
+#bp-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 30%), rgba(79,216,224,0.06), transparent 60%);
+}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+.shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* ============================================================
+   HEADER / TITLE BLOCK
+   ============================================================ */
+header.titleblock {
+  border-bottom: 1px solid var(--line);
+  padding: 22px 0 0 0;
+}
+
+.tb-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding-bottom: 22px;
+}
+
+.tb-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.tb-name .cursor {
+  display: inline-block;
+  width: 0.5ch;
+  background: var(--amber);
+  animation: blink 1.1s steps(1) infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.tb-role {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.tb-meta {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+}
+
+.tb-meta div {
+  padding: 8px 14px;
+  border-left: 1px solid var(--line);
+  white-space: nowrap;
+}
+.tb-meta div:first-child { border-left: none; }
+.tb-meta b {
+  display: block;
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.tb-meta span { color: var(--amber); }
+
+/* ============================================================
+   STATUS TICKER (sci-fi HUD detail, kept small + professional)
+   ============================================================ */
+.status-ticker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 14px;
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0 0 rgba(79,216,224,0.6);
+  animation: pulse 2.2s ease-out infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(79,216,224,0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(79,216,224,0); }
+  100% { box-shadow: 0 0 0 0 rgba(79,216,224,0); }
+}
+
+/* ============================================================
+   FEATURED — best-work-first row
+   ============================================================ */
+.featured-section {
+  padding: 22px 0 4px;
+}
+.featured-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.featured-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--text);
+}
+.featured-head .fh-sub {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.f-card {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.f-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--amber);
+  box-shadow: 0 16px 34px -14px rgba(0,0,0,0.65);
+}
+
+.f-card .f-thumb {
+  aspect-ratio: 16/10;
+  position: relative;
+  overflow: hidden;
+  background: var(--void);
+}
+.f-card .f-thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s var(--ease);
+  filter: saturate(0.85);
+}
+.f-card:hover .f-thumb img { transform: scale(1.05); filter: saturate(1); }
+
+/* corner bracket HUD accents — reveal on hover */
+.f-card .corner {
+  position: absolute;
+  width: 18px; height: 18px;
+  border: 0 solid var(--amber);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+  pointer-events: none;
+}
+.f-card:hover .corner { opacity: 0.9; }
+.f-card .corner.tl { top: 8px; left: 8px; border-top-width: 2px; border-left-width: 2px; }
+.f-card .corner.tr { top: 8px; right: 8px; border-top-width: 2px; border-right-width: 2px; }
+.f-card .corner.bl { bottom: 8px; left: 8px; border-bottom-width: 2px; border-left-width: 2px; }
+.f-card .corner.br { bottom: 8px; right: 8px; border-bottom-width: 2px; border-right-width: 2px; }
+
+.f-card .f-badge {
+  position: absolute;
+  top: 10px; left: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--void);
+  background: var(--amber);
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+.f-card .f-body { padding: 14px 16px 16px; }
+.f-card .f-role {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.f-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin: 0 0 6px;
+}
+.f-card p { font-size: 0.82rem; color: var(--text-dim); margin: 0; }
+
+/* ============================================================
+   CONTROL BAR — search + view toggle
+   ============================================================ */
+.controlbar {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 0;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.search-wrap::before {
+  content: "⌕";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+  font-size: 1rem;
+}
+
+#search {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 10px 14px 10px 32px;
+  border-radius: var(--radius);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+#search:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(79,216,224,0.12); outline: none; }
+#search::placeholder { color: var(--text-faint); }
+
+.count-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  border: 1px solid var(--line);
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.count-tag b { color: var(--amber); }
+
+.active-filter-chip {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--void);
+  background: var(--amber);
+  padding: 8px 8px 8px 12px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.active-filter-chip.show { display: flex; }
+.active-filter-chip button {
+  background: rgba(11,14,20,0.25);
+  border: none;
+  color: var(--void);
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.active-filter-chip button:hover { background: rgba(11,14,20,0.45); }
+
+/* ---- Back to top ---- */
+.back-to-top {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--panel-2);
+  border: 1px solid var(--cyan-dim);
+  color: var(--cyan);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), background 0.2s, color 0.2s;
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.6);
+}
+.back-to-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.back-to-top:hover { background: var(--cyan); color: var(--void); }
+
+/* ============================================================
+   MAIN GRID: sidebar (sheet index) + gallery
+   ============================================================ */
+.mainarea {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  padding: 8px 0 60px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .mainarea { grid-template-columns: 1fr; }
+
+  .sheetindex {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .sheetindex .folder-item {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+    border-bottom: none;
+    border-right: 1px solid var(--line);
+  }
+  .sheetindex .folder-item:last-child { border-right: none; }
+  .sheetindex .folder-item.active::before {
+    left: 0; top: auto; bottom: 0; right: 0;
+    width: auto; height: 2px;
+  }
+  .sheetindex .si-note { display: none; }
+}
+
+/* ---- Sidebar ---- */
+.sheetindex {
+  position: sticky;
+  top: 20px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sheetindex .si-head {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  text-align: left;
+  padding: 11px 14px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.folder-item:last-child { border-bottom: none; }
+
+.folder-item .ico {
+  font-family: var(--font-mono);
+  color: var(--cyan-dim);
+  width: 1.2em;
+  text-align: center;
+  transition: color 0.15s var(--ease);
+}
+
+.folder-item .fc {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.folder-item:hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.folder-item.active {
+  color: var(--text);
+  background: var(--panel-2);
+}
+.folder-item.active .ico { color: var(--amber); }
+.folder-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--amber);
+}
+
+.sheetindex .si-note {
+  padding: 12px 14px;
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  border-top: 1px solid var(--line);
+  line-height: 1.5;
+}
+
+/* ---- Gallery ---- */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform 0.28s var(--ease), border-color 0.28s var(--ease), box-shadow 0.28s var(--ease);
+  opacity: 0;
+  animation: rise 0.5s var(--ease) forwards;
+}
+.card:focus-visible, .f-card:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-color: var(--cyan);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--cyan-dim);
+  box-shadow: 0 12px 30px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(79,216,224,0.15);
+}
+
+.card .thumb {
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  position: relative;
+  background: var(--void);
+  border-bottom: 1px solid var(--line);
+}
+.card .thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s var(--ease), filter 0.5s var(--ease);
+  filter: saturate(0.85);
+}
+.card:hover .thumb img {
+  transform: scale(1.06);
+  filter: saturate(1);
+}
+
+.card .thumb .scanline {
+  position: absolute; left:0; right:0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  top: -10%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover .scanline { opacity: 0.8; animation: scan 1.4s linear infinite; }
+@keyframes scan { from { top: -5%; } to { top: 105%; } }
+
+.card .thumb .corner {
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 0 solid var(--cyan);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+  pointer-events: none;
+}
+.card:hover .thumb .corner { opacity: 0.8; }
+.card .thumb .corner.tl { top: 7px; left: 7px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.card .thumb .corner.br { bottom: 7px; right: 7px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+.card .body { padding: 14px 16px 16px; }
+
+.card .cnum {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.card h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 4px 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.card p.summary {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin: 0 0 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: rgba(79,216,224,0.05);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+/* ============================================================
+   MODAL / LIGHTBOX
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6,8,12,0.82);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease);
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  max-width: 880px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  transform: scale(0.96) translateY(10px);
+  transition: transform 0.28s var(--ease);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 18px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  position: sticky; top: 0;
+  background: var(--panel);
+  z-index: 3;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .modal-top { padding: 10px; }
+  .modal-nav-group { gap: 6px; }
+  .modal-step span, #modalPosition { font-size: 0.62rem; }
+  .modal-step { padding: 0 8px; height: 30px; }
+  .modal-close { width: 30px; height: 30px; }
+}
+
+.modal-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-step {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s var(--ease);
+  white-space: nowrap;
+}
+.modal-step:hover:not(:disabled) { color: var(--text); border-color: var(--cyan-dim); background: var(--panel); }
+.modal-step:disabled { opacity: 0.3; cursor: default; }
+
+.modal-close {
+  background: var(--panel-2);
+  border: 1px solid var(--text-faint);
+  color: var(--text);
+  width: 34px; height: 34px;
+  min-width: 34px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s var(--ease);
+}
+.modal-close:hover, .modal-close:focus-visible { color: var(--void); background: var(--danger); border-color: var(--danger); }
+
+.modal-hero {
+  aspect-ratio: 16/9;
+  background: var(--void);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+.modal-hero img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.modal-carousel-nav {
+  position: absolute; top: 0; bottom: 0;
+  width: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none;
+  color: var(--text);
+  font-size: 1.4rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+}
+.modal-hero:hover .modal-carousel-nav { opacity: 0.85; }
+.modal-carousel-nav:hover { background: rgba(0,0,0,0.3); opacity: 1; }
+.modal-carousel-nav.prev { left: 0; }
+.modal-carousel-nav.next { right: 0; }
+
+.modal-dots {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px;
+}
+.modal-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+}
+.modal-dots span.on { background: var(--cyan); }
+
+.modal-content { padding: 22px 24px 28px; }
+
+.modal-content h2 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  margin: 0 0 6px;
+}
+
+.modal-content .mc-tools {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--amber);
+  margin-bottom: 14px;
+}
+
+.modal-content .mc-desc {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.mc-role {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.case-study { margin-bottom: 20px; }
+.cs-block { margin-bottom: 16px; }
+.cs-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cs-label::before { content: "▸"; color: var(--cyan); }
+.cs-text { font-size: 0.9rem; color: var(--text-dim); line-height: 1.65; }
+.cs-steps { margin: 0; padding-left: 0; list-style: none; }
+.cs-steps li {
+  position: relative;
+  padding: 0 0 10px 22px;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+  border-left: 1px solid var(--line);
+  margin-left: 4px;
+}
+.cs-steps li:last-child { border-left: 1px solid transparent; padding-bottom: 0; }
+.cs-steps li::before {
+  content: "";
+  position: absolute;
+  left: -4px; top: 4px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--void);
+  border: 1px solid var(--cyan);
+}
+
+.modal-content .mc-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.modal-content .mc-links a:hover { background: var(--cyan); color: var(--void); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 20px 0 40px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+footer a { color: var(--text-dim); text-decoration: none; }
+footer a:hover { color: var(--cyan); }
+footer .rev { color: var(--text-faint); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+</style>
+</head>
+<body>
+
+<div id="bp-grid"></div>
+<div id="bp-glow"></div>
+
+<div class="shell">
+
+  <header class="titleblock">
+    <div class="tb-top">
+      <div>
+        <h1 class="tb-name">Anant<span class="cursor">&nbsp;</span></h1>
+        <div class="tb-role">Mechanical Design Engineer — CAD / CAE / Applied AI</div>
+      </div>
+      <div class="tb-meta">
+        <div><b>Sheet Set</b><span id="sheetTotal">000</span> drawings</div>
+        <div><b>Location</b><span>Chhindwara–Satpura, MP</span></div>
+        <div><b>Rev</b><span id="year">----</span></div>
+        <div><b>Scale</b><span>1 : 1</span></div>
+      </div>
+    </div>
+
+    <div class="status-ticker">
+      <span class="status-dot"></span>
+      SYSTEM ONLINE · OPEN TO OPPORTUNITIES
+      <a href="#" id="resumeLink" style="margin-left:14px; color:var(--cyan); text-decoration:none; border-bottom:1px dotted var(--cyan-dim);">↓ Download Resume</a>
+    </div>
+
+    <div class="controlbar">
+      <div class="search-wrap">
+        <input type="text" id="search" placeholder="Search sheets — title, tool, keyword…" autocomplete="off">
+      </div>
+      <div class="active-filter-chip" id="activeFilterChip">
+        <span id="activeFilterLabel"></span>
+        <button id="clearFilterBtn" aria-label="Clear folder filter, show all sheets">✕</button>
+      </div>
+      <div class="count-tag" id="countTag">— / — sheets shown</div>
+    </div>
+  </header>
+
+  <div id="featuredWrap" class="shell" style="padding:0;"></div>
+
+  <main class="mainarea">
+    <nav class="sheetindex" id="sheetIndex" aria-label="Folders">
+      <!-- populated by script.js -->
+    </nav>
+
+    <section class="gallery" id="gallery" aria-live="polite">
+      <!-- populated by script.js -->
+    </section>
+  </main>
+
+  <footer>
+    <div>Drafted &amp; maintained by Anant · built as a static site, no backend required.</div>
+    <div class="rev">
+      <a href="#" id="footerGithub">GitHub</a> ·
+      <a href="#" id="footerLinkedin">LinkedIn</a> ·
+      <a href="#" id="footerEmail">Email</a>
+    </div>
+  </footer>
+
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Project detail">
+    <div class="modal-top" id="modalTop">
+      <div class="modal-nav-group">
+        <button class="modal-step" id="modalPrev" title="Previous sheet (←)">‹ Prev</button>
+        <span id="modalPosition">SHEET — / —</span>
+        <button class="modal-step" id="modalNext" title="Next sheet (→)">Next ›</button>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Close (Esc)" title="Close (Esc)">✕</button>
+    </div>
+    <div class="modal-hero" id="modalHero"></div>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/*
+  ============================================================
+  PORTFOLIO CONTENT — this block, inside index.html, is the only
+  place you need to edit. Everything else in this file (styles,
+  behavior) you shouldn't need to touch for normal updates.
+  ============================================================
+
+  HOW FOLDERS WORK
+  - Folders are just labels. A project can list MORE THAN ONE
+    folder id in its own "folders" array, so the same project
+    shows up under every folder you put it in. Nothing is copied,
+    there is one entry per project.
+
+  HOW TO ADD A FOLDER
+  1. Add an object to the FOLDERS array below.
+     { id: "unique-id", name: "Display Name", icon: "◧", note: "one line description" }
+  2. Reference that id inside any project's "folders": [...] array.
+
+  HOW TO REMOVE A FOLDER
+  - Delete its object from FOLDERS. Projects that referenced it
+    just stop showing it as a tag — you don't need to touch them
+    unless you also want to drop them from that folder.
+
+  HOW TO ADD A PROJECT
+  1. Put images in: assets/img/<project-id>/  (any file names)
+  2. Add an object to PROJECTS below, list the image paths.
+  3. Put one or more folder ids in "folders": [...]
+  4. Optional case-study fields (used by the portfolio-review-style
+     modal): "featured": true, "role", "brief", "process": [...],
+     "outcome". Leave any of these out and it falls back to a plain
+     "description" paragraph.
+
+  HOW TO REMOVE A PROJECT
+  - Delete its object from PROJECTS. That's it.
+
+  VALIDATE BEFORE YOU PUSH
+  - Run: node scripts/validate.js
+  - It checks this exact block for typos, dangling folder ids, and
+    missing image files, and the same check runs automatically on
+    GitHub via .github/workflows/validate.yml
+*/
+
+window.PORTFOLIO = {
+
+  meta: {
+    name: "Anant",
+    role: "Mechanical Design Engineer — CAD / CAE / Applied AI",
+    tagline: "B.Tech Mechanical Engineering, RGPV 2026",
+    location: "Chhindwara–Satpura, Madhya Pradesh, India",
+    email: "you@example.com",
+    github: "https://github.com/yourusername",
+    linkedin: "https://linkedin.com/in/yourusername",
+    resume: "", // e.g. "assets/resume.pdf" — leave blank to hide the download link
+    sheetTotal: "" // auto-filled by script.js
+  },
+
+  FOLDERS: [
+    {
+      id: "cad-ai",
+      name: "Fusion 360 + CAD-AI",
+      icon: "◈",
+      note: "Python-scripted Fusion 360 workflows, local-LLM tooling"
+    },
+    {
+      id: "creative",
+      name: "Creative Design",
+      icon: "◎",
+      note: "Parametric art, exploratory form studies"
+    },
+    {
+      id: "vehicles",
+      name: "Vehicle Concepts",
+      icon: "◭",
+      note: "Concept car surfacing and vehicle form studies"
+    }
+  ],
+
+  PROJECTS: [
+
+    // ---- Added from uploaded renders — edit title/description/tools freely ----
+
+    {
+      id: "ev-aero-concept",
+      title: "EV Aero Concept", // TODO: swap in your real project name
+      featured: true,
+      role: "Concept Surfacing",
+      folders: ["vehicles", "cad-ai"],
+      date: "2026",
+      tools: ["Fusion 360"],
+      summary: "Low-drag EV concept shell with a gold trim accent line.",
+      brief:
+        "Explore how far a single continuous trim line can go toward reading as an aerodynamic feature rather than plain decoration.",
+      process: [
+        "Started from a top-view wireframe to keep the body symmetric about the centerline",
+        "Ran the gold trim as one continuous surface from front splitter to rear diffuser, not a decal",
+        "Rendered in three-quarter to check how the trim reads against the glass canopy"
+      ],
+      outcome:
+        "A concept where the trim line does double duty — it reads as a character line and roughly follows where an actual airflow guide would sit.",
+      description:
+        "A low-slung electric-vehicle concept surfaced in Fusion 360, built around a continuous gold accent line that runs from the front splitter to the rear diffuser. The top-view wireframe shows the underlying surface construction curves used to keep the body symmetric and drag-oriented.",
+      images: [
+        "assets/img/ev-aero-concept/01-top-blueprint.jpg",
+        "assets/img/ev-aero-concept/02-render-3q.jpg"
+      ],
+      links: { github: "" }
+    },
+    {
+      id: "family-concept-racer",
+      title: "Concept Racer — Quad-View Study", // TODO: swap in your real project name
+      folders: ["vehicles", "cad-ai"],
+      date: "2026",
+      tools: ["Fusion 360"],
+      summary: "Enclosed-cockpit racer, developed across matched four-view layouts.",
+      description:
+        "An enclosed-cockpit concept racer developed using matched four-view layouts (iso, top, front, side) to keep proportions locked while the surfacing was pushed further in each pass. Two iterations are shown side by side to compare how the canopy and rear haunch evolved.",
+      images: [
+        "assets/img/family-concept-racer/01-quad-view-a.jpg",
+        "assets/img/family-concept-racer/02-quad-view-b.jpg"
+      ],
+      links: { github: "" }
+    },
+    {
+      id: "batmobile-tribute",
+      title: "Batmobile-Inspired Muscle Car",
+      featured: true,
+      role: "Concept Surfacing",
+      folders: ["vehicles", "cad-ai", "creative"],
+      date: "2026",
+      tools: ["Fusion 360"],
+      summary: "A stylized muscle-car tribute with an exaggerated, blade-like nose.",
+      brief:
+        "Push a classic Batmobile silhouette into something that still reads as a buildable car, not just a movie prop.",
+      process: [
+        "Blocked the blade nose and fastback roofline in profile first, to lock the silhouette before surfacing anything",
+        "Built the three-quarter surfacing next, checking panel flow before committing to a top view",
+        "Balanced the gold trim band against the black body so it reads as a design line, not a decal"
+      ],
+      outcome:
+        "A resolved three-view concept — profile, three-quarter, and top — that holds together as a proportionally real vehicle rather than a single hero-angle render.",
+      description:
+        "A creative surfacing exercise riffing on classic Batmobile silhouettes: an exaggerated blade nose, a low fastback roofline, and a two-tone gold-and-black finish. Modeled fully in Fusion 360, shown here in profile, three-quarter, and top view.",
+      images: [
+        "assets/img/batmobile-tribute/01-side-profile.jpg",
+        "assets/img/batmobile-tribute/02-render-3q.jpg",
+        "assets/img/batmobile-tribute/03-top-view.jpg"
+      ],
+      links: { github: "" }
+    },
+    {
+      id: "bench-design",
+      title: "Wheel-Motif Public Bench",
+      folders: ["creative", "cad-ai"],
+      date: "2026",
+      tools: ["Fusion 360"],
+      summary: "Outdoor bench with a four-petal wheel motif at each end.",
+      description:
+        "A public-space bench concept where each end is built from a circular wheel motif with a four-petal cutout, paired with slim curved legs and a single-shell seat. Rendered here on cobblestone to test how the negative space in the wheel reads against a busy background.",
+      images: [
+        "assets/img/bench-design/01-render.jpg"
+      ],
+      links: { github: "" }
+    },
+    {
+      id: "hex-desk-lamp",
+      title: "Faceted Sheet-Metal Desk Lamp",
+      featured: true,
+      role: "Design & Fabrication Prep",
+      folders: ["cad-ai", "creative"],
+      date: "2026",
+      tools: ["Fusion 360", "Sheet Metal"],
+      summary: "Hexagonal shade lamp, taken all the way to a cuttable flat pattern.",
+      brief:
+        "Design a faceted lamp shade that could actually be cut from flat stock, not just rendered as a solid.",
+      process: [
+        "Blocked out the hexagonal shade and curved base bracket across four matched views to lock proportions first",
+        "Rebuilt the shade as a sheet-metal feature with real bend allowances instead of a plain solid",
+        "Generated the flat pattern to confirm every facet actually unfolds without overlap or a fouled bend"
+      ],
+      outcome:
+        "A ready-to-cut flat pattern for the shade plus a bracket profile sized to the same stock thickness — this exists as something a fabricator could cut tomorrow, not just a render.",
+      description:
+        "A faceted hexagonal desk-lamp shade on a curved sheet-metal bracket, modeled in Fusion 360 and carried through to a verified flat pattern. The four-view study locked the shade angle and bracket curve; the sheet-metal rebuild and flat-pattern unfold confirmed the geometry is actually manufacturable from flat stock.",
+      images: [
+        "assets/img/hex-desk-lamp/01-render.png",
+        "assets/img/hex-desk-lamp/02-orthographic-views.png",
+        "assets/img/hex-desk-lamp/03-sheet-metal-flat-pattern.png"
+      ],
+      links: { github: "" }
+    },
+    {
+      id: "cannon-carriage",
+      title: "Cannon on Wheeled Carriage",
+      folders: ["creative", "cad-ai"],
+      date: "2026",
+      tools: ["Fusion 360"],
+      summary: "Classic wheeled field-cannon, built from sketch through final body.",
+      description:
+        "A classic field-cannon on a wheeled carriage, taken from the initial 2D construction sketch (barrel profile plus carriage geometry) through to the final multi-body Fusion 360 model, including the barrel bore steps and cascabel.",
+      images: [
+        "assets/img/cannon-carriage/01-construction-sketch.jpg",
+        "assets/img/cannon-carriage/02-final-model.jpg"
+      ],
+      links: { github: "" }
+    }
+  ]
+};
+
+</script>
+<script>
+(function () {
+  "use strict";
+
+  const DATA = window.PORTFOLIO;
+  if (!DATA) {
+    console.error("PORTFOLIO data not found — the data <script> block must appear before this one in index.html");
+    return;
+  }
+
+  const state = {
+    activeFolder: "all",
+    query: "",
+    modalProject: null,
+    modalImgIndex: 0,
+    modalList: [],
+    modalIndex: -1,
+    lastFocusedEl: null
+  };
+
+  const el = {
+    sheetIndex: document.getElementById("sheetIndex"),
+    gallery: document.getElementById("gallery"),
+    search: document.getElementById("search"),
+    countTag: document.getElementById("countTag"),
+    sheetTotal: document.getElementById("sheetTotal"),
+    modalOverlay: document.getElementById("modalOverlay"),
+    modalTop: document.getElementById("modalTop"),
+    modalHero: document.getElementById("modalHero"),
+    modalContent: document.getElementById("modalContent"),
+    modalClose: document.getElementById("modalClose"),
+    modalPrev: document.getElementById("modalPrev"),
+    modalNext: document.getElementById("modalNext"),
+    modalPosition: document.getElementById("modalPosition"),
+    activeFilterChip: document.getElementById("activeFilterChip"),
+    activeFilterLabel: document.getElementById("activeFilterLabel"),
+    clearFilterBtn: document.getElementById("clearFilterBtn"),
+    backToTop: document.getElementById("backToTop"),
+    year: document.getElementById("year")
+  };
+
+  /* -------------------- helpers -------------------- */
+
+  function folderById(id) {
+    return DATA.FOLDERS.find(f => f.id === id);
+  }
+
+  function projectsForFolder(folderId) {
+    if (folderId === "all") return DATA.PROJECTS;
+    return DATA.PROJECTS.filter(p => p.folders.includes(folderId));
+  }
+
+  function matchesQuery(p, q) {
+    if (!q) return true;
+    const hay = [
+      p.title, p.summary, p.description,
+      ...(p.tools || []),
+      ...(p.folders.map(id => (folderById(id) || {}).name || ""))
+    ].join(" ").toLowerCase();
+    return hay.includes(q.toLowerCase());
+  }
+
+  function folderCount(id) {
+    return projectsForFolder(id).length;
+  }
+
+  /* -------------------- render: sidebar -------------------- */
+
+  function renderSidebar() {
+    const items = [{ id: "all", name: "All Sheets", icon: "▣", note: "Everything in the set" }, ...DATA.FOLDERS];
+
+    el.sheetIndex.innerHTML = items.map(f => `
+      <button class="folder-item ${state.activeFolder === f.id ? "active" : ""}" data-folder="${f.id}" title="${(f.note || "").replace(/"/g,'&quot;')}">
+        <span class="ico">${f.icon || "▢"}</span>
+        <span>${f.name}</span>
+        <span class="fc">${String(folderCount(f.id)).padStart(2, "0")}</span>
+      </button>
+    `).join("");
+
+    el.sheetIndex.querySelectorAll(".folder-item").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.activeFolder = btn.dataset.folder;
+        renderSidebar();
+        renderGallery();
+        updateActiveFilterChip();
+      });
+    });
+  }
+
+  function updateActiveFilterChip() {
+    if (state.activeFolder === "all") {
+      el.activeFilterChip.classList.remove("show");
+      return;
+    }
+    const f = folderById(state.activeFolder);
+    el.activeFilterLabel.textContent = `Viewing: ${f ? f.name : state.activeFolder}`;
+    el.activeFilterChip.classList.add("show");
+  }
+
+  el.clearFilterBtn.addEventListener("click", () => {
+    state.activeFolder = "all";
+    renderSidebar();
+    renderGallery();
+    updateActiveFilterChip();
+  });
+
+  /* -------------------- render: featured row -------------------- */
+
+  function renderFeatured() {
+    const wrap = document.getElementById("featuredWrap");
+    if (!wrap) return;
+    const featured = DATA.PROJECTS.filter(p => p.featured);
+    if (!featured.length) { wrap.innerHTML = ""; return; }
+
+    wrap.innerHTML = `
+      <div class="featured-section">
+        <div class="featured-head">
+          <h2>Featured Sheets</h2>
+          <span class="fh-sub">${featured.length} highlighted</span>
+        </div>
+        <div class="featured-grid">
+          ${featured.map(p => `
+            <article class="f-card" data-id="${p.id}" tabindex="0" role="button" aria-label="Open ${p.title} details">
+              <div class="f-thumb">
+                <span class="f-badge">Featured</span>
+                <span class="corner tl"></span>
+                <span class="corner tr"></span>
+                <span class="corner bl"></span>
+                <span class="corner br"></span>
+                ${p.images && p.images[0] ? `<img src="${p.images[0]}" alt="${p.title}" loading="lazy">` : ""}
+              </div>
+              <div class="f-body">
+                ${p.role ? `<div class="f-role">${p.role}</div>` : ""}
+                <h3>${p.title}</h3>
+                <p>${p.summary || ""}</p>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `;
+
+    wrap.querySelectorAll(".f-card").forEach(card => {
+      card.addEventListener("click", () => openModal(card.dataset.id, featured));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openModal(card.dataset.id, featured);
+        }
+      });
+    });
+  }
+
+  /* -------------------- render: gallery -------------------- */
+
+  function renderGallery() {
+    let list = projectsForFolder(state.activeFolder).filter(p => matchesQuery(p, state.query));
+
+    el.countTag.innerHTML = `<b>${list.length}</b> / ${DATA.PROJECTS.length} sheets shown`;
+
+    if (list.length === 0) {
+      el.gallery.innerHTML = `<div class="empty-state">NO SHEETS MATCH — try a different folder or clear the search field.</div>`;
+      return;
+    }
+
+    el.gallery.innerHTML = list.map((p, i) => {
+      const thumb = (p.images && p.images[0]) || "";
+      const folderNames = p.folders.map(id => (folderById(id) || {}).name).filter(Boolean);
+      return `
+        <article class="card" data-id="${p.id}" tabindex="0" role="button" aria-label="Open ${p.title} details" style="animation-delay:${Math.min(i * 45, 400)}ms">
+          <div class="thumb">
+            <span class="scanline"></span>
+            <span class="corner tl"></span>
+            <span class="corner br"></span>
+            ${thumb ? `<img src="${thumb}" alt="${p.title}" loading="lazy">` : ""}
+          </div>
+          <div class="body">
+            <div class="cnum">SHEET ${String(i + 1).padStart(2, "0")} · ${p.date || ""}</div>
+            <h3>${p.title}</h3>
+            <p class="summary">${p.summary || ""}</p>
+            <div class="tags">
+              ${folderNames.map(n => `<span class="tag">${n}</span>`).join("")}
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    el.gallery.querySelectorAll(".card").forEach(card => {
+      card.addEventListener("click", () => openModal(card.dataset.id, list));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openModal(card.dataset.id, list);
+        }
+      });
+    });
+  }
+
+  /* -------------------- modal -------------------- */
+
+  function openModal(id, list) {
+    const project = DATA.PROJECTS.find(p => p.id === id);
+    if (!project) return;
+
+    state.lastFocusedEl = document.activeElement;
+    state.modalProject = project;
+    state.modalImgIndex = 0;
+    state.modalList = (list && list.length) ? list : DATA.PROJECTS;
+    state.modalIndex = state.modalList.findIndex(p => p.id === id);
+
+    renderModalChrome();
+    renderModalHero();
+    el.modalOverlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    el.modalClose.focus();
+  }
+
+  function renderModalChrome() {
+    const project = state.modalProject;
+    const total = state.modalList.length;
+    const pos = state.modalIndex + 1;
+
+    el.modalPosition.textContent = total > 1 ? `SHEET ${pos} / ${total}` : `PROJECT FILE`;
+    el.modalPrev.disabled = total <= 1;
+    el.modalNext.disabled = total <= 1;
+
+    const folderNames = project.folders.map(fid => (folderById(fid) || {}).name).filter(Boolean);
+    const hasCaseStudy = project.brief || (project.process && project.process.length) || project.outcome;
+
+    const caseStudyHtml = hasCaseStudy ? `
+      <div class="case-study">
+        ${project.brief ? `
+          <div class="cs-block">
+            <div class="cs-label">Brief</div>
+            <div class="cs-text">${project.brief}</div>
+          </div>` : ""}
+        ${project.process && project.process.length ? `
+          <div class="cs-block">
+            <div class="cs-label">Process</div>
+            <ul class="cs-steps">
+              ${project.process.map(step => `<li>${step}</li>`).join("")}
+            </ul>
+          </div>` : ""}
+        ${project.outcome ? `
+          <div class="cs-block">
+            <div class="cs-label">Outcome</div>
+            <div class="cs-text">${project.outcome}</div>
+          </div>` : ""}
+      </div>
+    ` : `<p class="mc-desc">${project.description || project.summary || ""}</p>`;
+
+    el.modalContent.innerHTML = `
+      <h2>${project.title}</h2>
+      ${project.role ? `<div class="mc-role">${project.role}</div>` : ""}
+      <div class="mc-tools">${(project.tools || []).join(" · ")}</div>
+      ${caseStudyHtml}
+      <div class="tags" style="margin-bottom:18px;">
+        ${folderNames.map(n => `<span class="tag">${n}</span>`).join("")}
+      </div>
+      <div class="mc-links">
+        ${project.links && project.links.github ? `<a href="${project.links.github}" target="_blank" rel="noopener">↗ Repository</a>` : ""}
+        ${project.links && project.links.demo ? `<a href="${project.links.demo}" target="_blank" rel="noopener">↗ Live / Demo</a>` : ""}
+      </div>
+    `;
+    document.querySelector(".modal").scrollTop = 0;
+  }
+
+  function stepModal(dir) {
+    const total = state.modalList.length;
+    if (total <= 1) return;
+    state.modalIndex = (state.modalIndex + dir + total) % total;
+    const nextProject = state.modalList[state.modalIndex];
+    state.modalProject = nextProject;
+    state.modalImgIndex = 0;
+    renderModalChrome();
+    renderModalHero();
+  }
+
+  el.modalPrev.addEventListener("click", () => stepModal(-1));
+  el.modalNext.addEventListener("click", () => stepModal(1));
+
+  function renderModalHero() {
+    const p = state.modalProject;
+    if (!p) return;
+    const images = p.images && p.images.length ? p.images : [];
+    const total = images.length;
+    const idx = state.modalImgIndex;
+
+    el.modalHero.innerHTML = `
+      ${total ? `<img src="${images[idx]}" alt="${p.title}">` : ""}
+      ${total > 1 ? `
+        <button class="modal-carousel-nav prev" aria-label="Previous image">‹</button>
+        <button class="modal-carousel-nav next" aria-label="Next image">›</button>
+        <div class="modal-dots">
+          ${images.map((_, i) => `<span class="${i === idx ? "on" : ""}"></span>`).join("")}
+        </div>
+      ` : ""}
+    `;
+
+    if (total > 1) {
+      el.modalHero.querySelector(".prev").addEventListener("click", () => {
+        state.modalImgIndex = (idx - 1 + total) % total;
+        renderModalHero();
+      });
+      el.modalHero.querySelector(".next").addEventListener("click", () => {
+        state.modalImgIndex = (idx + 1) % total;
+        renderModalHero();
+      });
+    }
+  }
+
+  function closeModal() {
+    el.modalOverlay.classList.remove("open");
+    document.body.style.overflow = "";
+    if (state.lastFocusedEl && document.contains(state.lastFocusedEl)) {
+      state.lastFocusedEl.focus();
+    }
+  }
+
+  el.modalClose.addEventListener("click", closeModal);
+  el.modalOverlay.addEventListener("click", (e) => {
+    if (e.target === el.modalOverlay) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+    if (state.modalProject && el.modalOverlay.classList.contains("open")) {
+      if (e.key === "ArrowRight") el.modalHero.querySelector(".next")?.click();
+      if (e.key === "ArrowLeft") el.modalHero.querySelector(".prev")?.click();
+    }
+  });
+
+  /* -------------------- search -------------------- */
+
+  el.search.addEventListener("input", (e) => {
+    state.query = e.target.value.trim();
+    renderGallery();
+  });
+
+  /* -------------------- back to top -------------------- */
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 500) el.backToTop.classList.add("show");
+    else el.backToTop.classList.remove("show");
+  }, { passive: true });
+
+  el.backToTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  /* -------------------- ambient background parallax -------------------- */
+
+  const grid = document.getElementById("bp-grid");
+  const glowRoot = document.documentElement;
+  window.addEventListener("mousemove", (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 16;
+    const y = (e.clientY / window.innerHeight - 0.5) * 16;
+    grid.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    glowRoot.style.setProperty("--mx", `${e.clientX}px`);
+    glowRoot.style.setProperty("--my", `${e.clientY}px`);
+  }, { passive: true });
+
+  /* -------------------- init -------------------- */
+
+  function init() {
+    el.year.textContent = new Date().getFullYear();
+    el.sheetTotal.textContent = String(DATA.PROJECTS.length).padStart(3, "0");
+    renderFeatured();
+    renderSidebar();
+    renderGallery();
+    updateActiveFilterChip();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+
+</script>
+<script>
+  // wire footer links from the meta block in content.js
+  document.addEventListener("DOMContentLoaded", () => {
+    const m = window.PORTFOLIO.meta;
+    const gh = document.getElementById("footerGithub");
+    const li = document.getElementById("footerLinkedin");
+    const em = document.getElementById("footerEmail");
+    if (m.github) gh.href = m.github;
+    if (m.linkedin) li.href = m.linkedin;
+    if (m.email) em.href = "mailto:" + m.email;
+
+    const resumeLink = document.getElementById("resumeLink");
+    if (m.resume) {
+      resumeLink.href = m.resume;
+      resumeLink.setAttribute("download", "");
+    } else {
+      resumeLink.style.display = "none";
+    }
+  });
+</script>
+</body>
+</html>
